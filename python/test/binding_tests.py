@@ -41,6 +41,16 @@ status, robustness = eq.computeEquilibriumRobustness(c,ddc)
 assert (status == LP_STATUS_OPTIMAL), "LP should not fail"
 assert (robustness < 0), "first test should NOT be in equilibrirum"
 
+
+ddc= asmatrix(array([20.,0.,21.]))
+status, robustness = eq.findMaximumAccelerationOnline(c,ddc)
+assert (status == LP_STATUS_OPTIMAL), "LP should not fail"
+assert (robustness < 0), "first test should NOT be in equilibrirum"
+
+ddc= asmatrix(array([0,0.,0.]))
+status, robustness = eq.findMaximumAccelerationOnline(c,ddc)
+assert (status == LP_STATUS_UNBOUNDED), "LP should fail"
+
 #now, use polytope projection algorithm
 eq.setNewContacts(asmatrix(P),asmatrix(N),0.3,EquilibriumAlgorithm.EQUILIBRIUM_ALGORITHM_PP)
 H,h = eq.getPolytopeInequalities()

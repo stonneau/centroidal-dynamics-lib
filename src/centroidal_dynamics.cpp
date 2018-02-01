@@ -619,6 +619,69 @@ LP_status Equilibrium::findMaximumAcceleration(Cref_matrixXX A, Cref_vector6 h, 
 
 }
 
+LP_status Equilibrium::findMaximumAccelerationOnline(Cref_vector3 com, Cref_vector3 ddc, double& alpha0)
+{
+    // generators
+    Matrix63 H;
+    H.block<3,3>(0,0) = Matrix3::Identity();
+    H.block<3,3>(3,0) = crossMatrix(com); H*=m_mass;
+    Vector6 d;
+    d.head(3)= -m_gravity * m_mass;
+    d.tail(3)= com.cross(-m_gravity * m_mass);
+    value_type alpha_req = ddc.norm();
+    Vector3 a = Vector3::Zero();
+    if(alpha_req > 0.)
+    {
+        a = ddc / alpha_req;
+    }
+    else
+    {
+        alpha0 = -std::numeric_limits<double>::infinity();
+        return LP_STATUS_UNBOUNDED;
+    }
+    int m = (int)m_G_centr.cols(); // 4* number of contacts
+    //m_G_centr
+    Matrix6X C = MatrixXX::Zero(6,m+1);
+    C.block(0,0,6,m) = -m_G_centr;
+    C.block(0,m,6,1) = -H*a;
+
+    VectorX q = VectorX::Zero(m+1);
+    q(m) = -1.0;  // because we search max alpha0
+
+    /* qpoases is Solve the linear program
+     *  minimize    c' x
+     *  subject to  Alb <= A x <= Aub
+     *              lb <= x <= ub
+     *
+     * reformulating from quadprog
+     *  #min q' x
+     *  subject to  G x <= h
+     *  subject to  C x  = d
+     */
+
+    VectorX b_a0 = VectorX::Zero(m+1);
+    VectorX lb = VectorX::Zero(m+1); lb(lb.rows()-1) = -40000;
+    VectorX ub = VectorX::Ones(m+1)*1e10; // Inf
+    VectorX Alb = d;
+    VectorX Aub = d;
+
+
+    LP_status lpStatus = m_solver->solve(q, lb, ub, C, Alb, Aub, b_a0);
+    if(lpStatus==LP_STATUS_UNBOUNDED){
+      //SEND_DEBUG_MSG("Primal LP problem is unbounded : "+toString(lpStatus));
+      alpha0 = -std::numeric_limits<double>::infinity();
+      return lpStatus;
+    }
+    if(lpStatus==LP_STATUS_OPTIMAL)
+    {
+      alpha0 = -1.0 * m_solver->getObjectiveValue() - alpha_req;
+      return lpStatus;
+    }
+    alpha0 = 0.0;
+    //SEND_DEBUG_MSG("Primal LP problem could not be solved: "+toString(lpStatus));
+    return lpStatus;
+}
+
 bool Equilibrium::checkAdmissibleAcceleration(Cref_matrixXX G, Cref_matrixXX H, Cref_vector6 h, Cref_vector3 a ){
   int m = (int)G.cols(); // number of contact * 4
   VectorX b(m);

@@ -26,6 +26,14 @@ boost::python::tuple wrapComputeEquilibriumRobustness(Equilibrium& self, const V
     return boost::python::make_tuple(status, robustness);
 }
 
+
+boost::python::tuple wrapFindMaximumAccelerationOnline(Equilibrium& self, const Vector3& com, const Vector3& acc)
+{
+    double robustness;
+    LP_status status = self.findMaximumAccelerationOnline(com, acc, robustness);
+    return boost::python::make_tuple(status, robustness);
+}
+
 boost::python::tuple wrapGetPolytopeInequalities(Equilibrium& self)
 {
     MatrixXX H;
@@ -95,6 +103,7 @@ BOOST_PYTHON_MODULE(centroidal_dynamics)
             .def("setNewContacts", setNewContacts)
             .def("computeEquilibriumRobustness", wrapComputeQuasiEquilibriumRobustness)
             .def("computeEquilibriumRobustness", wrapComputeEquilibriumRobustness)
+            .def("findMaximumAccelerationOnline", wrapFindMaximumAccelerationOnline)
             .def("getPolytopeInequalities", wrapGetPolytopeInequalities)
     ;
 }

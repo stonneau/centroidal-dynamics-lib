@@ -298,6 +298,28 @@ public:
   LP_status findMaximumAcceleration(Cref_matrixXX A, Cref_vector6 h, double& alpha0);
 
   /**
+   * @brief findMaximumAccelerationOnline Find the maximal acceleration along a given direction
+   *  it is always feasible because alpha can be negative and go on the direction opposite
+          find          b, alpha0
+          maximize      alpha0
+          subject to    -h <= [-G  (Hv)] [b a0]^T   <= -h
+                        0       <= [b a0]^T <= Inf
+
+
+          b         are the coefficient of the contact force generators (f = V b)
+          v         is the vector3 defining the direction of the motion
+          alpha0    is the maximal amplitude of the acceleration, for the given direction v
+          c         is the CoM position
+          G         is the matrix whose columns are the gravito-inertial wrench generators
+          A         is [-G  (Hv)]
+   * @param A
+   * @param h
+   * @param alpha0
+   * @return The status of the LP solver.
+   */
+  LP_status findMaximumAccelerationOnline(Cref_vector3 com, Cref_vector3 ddc, double& alpha0);
+
+  /**
    * @brief checkAdmissibleAcceleration return true if the given acceleration is admissible for the given contacts
           find          b
           subject to    G b = Ha + h
