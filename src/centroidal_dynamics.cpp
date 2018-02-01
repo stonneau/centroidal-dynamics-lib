@@ -674,7 +674,7 @@ LP_status Equilibrium::findMaximumAccelerationOnline(Cref_vector3 com, Cref_vect
     }
     if(lpStatus==LP_STATUS_OPTIMAL)
     {
-      alpha0 = -1.0 * m_solver->getObjectiveValue() - alpha_req;
+      alpha0 = -1.0 * m_solver->getObjectiveValue();
       return lpStatus;
     }
     alpha0 = 0.0;
