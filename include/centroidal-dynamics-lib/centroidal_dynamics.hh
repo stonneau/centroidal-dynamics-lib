@@ -299,7 +299,8 @@ public:
 
   /**
    * @brief findMaximumAccelerationOnline Find the maximal acceleration along a given direction
-   *  it is always feasible because alpha can be negative and go on the direction opposite
+   *  it is always feasible because alpha can be negative and go on the direction opposite. If acceleration is 0 return
+   *  equilibrium robustness
           find          b, alpha0
           maximize      alpha0
           subject to    -h <= [-G  (Hv)] [b a0]^T   <= -h
@@ -318,6 +319,7 @@ public:
    * @return The status of the LP solver.
    */
   LP_status findMaximumAccelerationOnline(Cref_vector3 com, Cref_vector3 ddc, double& alpha0);
+  LP_status findMaximumAccelerationRobustness(Cref_vector3 com, Cref_vector3 ddc, double& alpha0);
 
   /**
    * @brief checkAdmissibleAcceleration return true if the given acceleration is admissible for the given contacts

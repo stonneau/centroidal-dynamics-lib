@@ -682,6 +682,22 @@ LP_status Equilibrium::findMaximumAccelerationOnline(Cref_vector3 com, Cref_vect
     return lpStatus;
 }
 
+LP_status Equilibrium::findMaximumAccelerationRobustness(Cref_vector3 com, Cref_vector3 ddc, double& alpha0)
+{
+    value_type alpha_req = ddc.norm();
+    if(alpha_req == 0.)
+    {
+       return computeEquilibriumRobustness(com,ddc,alpha0);
+    }
+    else
+    {
+        LP_status status = findMaximumAccelerationOnline(com, ddc, alpha0);
+        alpha0 = alpha0 > alpha_req ? 0 : alpha_req - alpha0;
+        return status;
+    }
+
+}
+
 bool Equilibrium::checkAdmissibleAcceleration(Cref_matrixXX G, Cref_matrixXX H, Cref_vector6 h, Cref_vector3 a ){
   int m = (int)G.cols(); // number of contact * 4
   VectorX b(m);
